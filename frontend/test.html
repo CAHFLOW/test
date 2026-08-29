@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>API Test</title>
+</head>
+
+<body>
+
+    <button id="testBtn">
+        Test Login API
+    </button>
+
+    <script>
+
+        const testBtn = document.getElementById("testBtn");
+
+        testBtn.addEventListener("click", testLogin);
+
+
+        function testLogin(){
+
+            fetch("http://localhost:5000/login", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    phone: "0712345678",
+                    pin: "1234"
+                })
+
+            })
+            .then(function(response){
+
+                return response.json();
+
+            })
+            .then(function(data){
+
+                console.log(data);
+
+            });
+
+        }
+
+    </script>
+
+</body>
+
+</html>
