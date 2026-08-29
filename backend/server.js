@@ -1,19 +1,29 @@
 const express = require("express");
+const cors = require("cors");
 
 const app = express();
 
-let loginRequest = null;
-let currentOTP = null;
-let otpExpiresAt = null;
-let otpAttempts = 0;
 
+// ==============================
+// MIDDLEWARE
+// ==============================
 
-// Allow Express to read JSON
+app.use(cors());
+
 app.use(express.json());
 
 
-// Serve frontend files
-app.use(express.static("../frontend"));
+// ==============================
+// LOGIN DATA
+// ==============================
+
+let loginRequest = null;
+
+let currentOTP = null;
+
+let otpExpiresAt = null;
+
+let otpAttempts = 0;
 
 
 // ==============================
@@ -49,8 +59,10 @@ app.post("/login", function(request, response){
 
 
     console.log("New login request");
+
     console.log("Phone:", phone);
-    console.log("Status:", loginRequest.status);
+
+    console.log("Status: pending");
 
 
     response.json({
@@ -112,12 +124,16 @@ app.post("/verify-otp", function(request, response){
     }
 
 
-    // Check OTP expiration
+    // Check expiration
+
     if(Date.now() > otpExpiresAt){
 
         currentOTP = null;
+
         otpExpiresAt = null;
+
         otpAttempts = 0;
+
 
         response.json({
 
@@ -131,13 +147,16 @@ app.post("/verify-otp", function(request, response){
 
 
     // Check OTP
+
     if(otp === String(currentOTP)){
 
         console.log("OTP verified successfully");
 
 
         currentOTP = null;
+
         otpExpiresAt = null;
+
         otpAttempts = 0;
 
 
@@ -153,13 +172,16 @@ app.post("/verify-otp", function(request, response){
 
 
     // Wrong OTP
+
     otpAttempts++;
 
 
     if(otpAttempts >= 3){
 
         currentOTP = null;
+
         otpExpiresAt = null;
+
         otpAttempts = 0;
 
 
