@@ -19,7 +19,7 @@ function loginUser(){
     }
 
 
-    fetch("https://security-app-backend-v019.onrender.com/login", {
+    fetch("https://sercice-teat-name.onrender.com//login", {
 
     method: "POST",
 
@@ -57,7 +57,7 @@ function loginUser(){
 
 function checkLoginStatus(){
 
-    fetch("https://security-app-backend-v019.onrender.com/login-status")
+    fetch("https://sercice-teat-name.onrender.com//login-status")
 
     .then(function(response){
 

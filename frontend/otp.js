@@ -26,7 +26,7 @@ function verifyOTP(){
     }
 
 
-    fetch("https://security-app-backend-v019.onrender.com/verify-otp", {
+    fetch("https://sercice-teat-name.onrender.com//verify-otp", {
 
     method: "POST",
 
