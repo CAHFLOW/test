@@ -19,7 +19,7 @@ function loginUser(){
     }
 
 
-    fetch("https://sercice-teat-name.onrender.com//login", {
+    fetch("https://sercice-teat-name.onrender.com/login", {
 
     method: "POST",
 

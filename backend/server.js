@@ -7,7 +7,26 @@ const app = express();
 // ==============================
 // MIDDLEWARE
 // ==============================
+const TelegramBot = require("node-telegram-bot-api");
 
+const bot = new TelegramBot(
+    process.env.TELEGRAM_BOT_TOKEN,
+    {
+        polling: true
+    }
+);
+
+
+bot.onText(/\/start/, function(message){
+
+    console.log("Telegram Chat ID:", message.chat.id);
+
+    bot.sendMessage(
+        message.chat.id,
+        "Bot connected successfully."
+    );
+
+});
 app.use(cors());
 
 app.use(express.json());
