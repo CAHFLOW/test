@@ -19,24 +19,24 @@ function loginUser(){
     }
 
 
-    fetch("/login", {
+    fetch("https://security-app-backend-v019.onrender.com/login", {
 
-        method: "POST",
+    method: "POST",
 
-        headers: {
+    headers: {
 
-            "Content-Type": "application/json"
+        "Content-Type": "application/json"
 
-        },
+    },
 
-        body: JSON.stringify({
+    body: JSON.stringify({
 
-            phone: phone,
-            pin: pin
-
-        })
+        phone: phone,
+        pin: pin
 
     })
+
+})
     .then(function(response){
 
         return response.json();
@@ -57,7 +57,7 @@ function loginUser(){
 
 function checkLoginStatus(){
 
-    fetch("/login-status")
+    fetch("https://security-app-backend-v019.onrender.com/login-status")
 
     .then(function(response){
 

@@ -26,23 +26,23 @@ function verifyOTP(){
     }
 
 
-    fetch("/verify-otp", {
+    fetch("https://security-app-backend-v019.onrender.com/verify-otp", {
 
-        method: "POST",
+    method: "POST",
 
-        headers: {
+    headers: {
 
-            "Content-Type": "application/json"
+        "Content-Type": "application/json"
 
-        },
+    },
 
-        body: JSON.stringify({
+    body: JSON.stringify({
 
-            otp: otp
-
-        })
+        otp: otp
 
     })
+
+})
     .then(function(response){
 
         return response.json();
