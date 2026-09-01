@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const TelegramBot = require("node-telegram-bot-api");
 
 const app = express();
 
@@ -15,82 +14,53 @@ app.use(express.json());
 
 
 // ==============================
-// TELEGRAM BOT
-// ==============================
-
-const bot = new TelegramBot(
-    process.env.TELEGRAM_BOT_TOKEN,
-    {
-        polling: true
-    }
-);
-
-
-// ==============================
-// TELEGRAM START
-// ==============================
-
-bot.onText(/\/start/, function(message) {
-
-    console.log("Telegram Chat ID:", message.chat.id);
-
-    bot.sendMessage(
-        message.chat.id,
-        "Security app bot is connected."
-    );
-
-});
-
-
-// ==============================
 // LOGIN DATA
 // ==============================
 
 let loginRequest = null;
+
+let currentOTP = null;
+
+let otpExpiresAt = null;
+
+let otpAttempts = 0;
 
 
 // ==============================
 // LOGIN
 // ==============================
 
-app.post("/login", function(request, response) {
+app.post("/login", function(request, response){
 
-    let userId = request.body.userId;
+    let phone = request.body.phone;
+    let pin = request.body.pin;
 
-
-    if (!userId) {
+    if(!phone || !pin){
 
         response.status(400).json({
 
             success: false,
-            message: "User ID is required"
+            message: "Phone and PIN are required"
 
         });
 
         return;
     }
 
-
     loginRequest = {
 
-        userId: userId,
-
+        phone: phone,
         status: "pending"
 
     };
 
-
     console.log("New login request");
-
-    console.log("User ID:", userId);
-
+    console.log("Phone:", phone);
     console.log("Status: pending");
-
 
     response.json({
 
         success: true,
-
         message: "Waiting for approval"
 
     });
@@ -102,9 +72,9 @@ app.post("/login", function(request, response) {
 // LOGIN STATUS
 // ==============================
 
-app.get("/login-status", function(request, response) {
+app.get("/login-status", function(request, response){
 
-    if (loginRequest === null) {
+    if(loginRequest === null){
 
         response.json({
 
@@ -115,10 +85,91 @@ app.get("/login-status", function(request, response) {
         return;
     }
 
-
     response.json({
 
         status: loginRequest.status
+
+    });
+
+});
+
+
+// ==============================
+// VERIFY OTP
+// ==============================
+
+app.post("/verify-otp", function(request, response){
+
+    let otp = request.body.otp;
+
+    if(!currentOTP){
+
+        response.json({
+
+            success: false,
+            message: "No active OTP"
+
+        });
+
+        return;
+    }
+
+    if(Date.now() > otpExpiresAt){
+
+        currentOTP = null;
+        otpExpiresAt = null;
+        otpAttempts = 0;
+
+        response.json({
+
+            success: false,
+            message: "OTP has expired"
+
+        });
+
+        return;
+    }
+
+    if(otp === String(currentOTP)){
+
+        currentOTP = null;
+        otpExpiresAt = null;
+        otpAttempts = 0;
+
+        response.json({
+
+            success: true,
+            message: "OTP correct"
+
+        });
+
+        return;
+    }
+
+    otpAttempts++;
+
+    if(otpAttempts >= 3){
+
+        currentOTP = null;
+        otpExpiresAt = null;
+        otpAttempts = 0;
+
+        response.json({
+
+            success: false,
+            message: "Too many incorrect attempts"
+
+        });
+
+        return;
+    }
+
+    response.json({
+
+        success: false,
+        message:
+        "Wrong OTP. Attempts remaining: " +
+        (3 - otpAttempts)
 
     });
 
@@ -131,8 +182,7 @@ app.get("/login-status", function(request, response) {
 
 const PORT = process.env.PORT || 5000;
 
-
-app.listen(PORT, function() {
+app.listen(PORT, function(){
 
     console.log(
         "Server is running on port " + PORT
