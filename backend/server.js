@@ -3,6 +3,11 @@ const cors = require("cors");
 
 const app = express();
 
+app.get("/", function(request, response){
+
+    response.send("Backend is running");
+
+});
 
 // ==============================
 // MIDDLEWARE
