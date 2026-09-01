@@ -34,7 +34,22 @@ let otpAttempts = 0;
 // ==============================
 // LOGIN
 // ==============================
+app.post("/approve-demo", function(request, response){
+    if(loginRequest === null){
+        response.json({
+            success: false,
+            message: "No login request"
+        });
+        return;
+    }
 
+    loginRequest.status = "approved";
+
+    response.json({
+        success: true,
+        message: "Demo request approved"
+    });
+});
 app.post("/login", function(request, response){
 
     let phone = request.body.phone;
