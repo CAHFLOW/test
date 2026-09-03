@@ -1,4 +1,3 @@
-```js
 const express = require("express");
 const cors = require("cors");
 
@@ -43,24 +42,30 @@ app.post("/login", function(request, response) {
     if (!phone || !pin) {
 
         response.status(400).json({
+
             success: false,
             message: "Phone and PIN are required"
+
         });
 
         return;
     }
 
     loginRequest = {
+
         phone: phone,
         status: "pending"
+
     };
 
     console.log("New demo login request");
     console.log("Status: pending");
 
     response.json({
+
         success: true,
         message: "Waiting for approval"
+
     });
 
 });
@@ -75,14 +80,18 @@ app.get("/login-status", function(request, response) {
     if (loginRequest === null) {
 
         response.json({
+
             status: "none"
+
         });
 
         return;
     }
 
     response.json({
+
         status: loginRequest.status
+
     });
 
 });
@@ -97,8 +106,10 @@ app.post("/approve-demo", function(request, response) {
     if (loginRequest === null) {
 
         response.json({
+
             success: false,
             message: "No login request"
+
         });
 
         return;
@@ -109,8 +120,40 @@ app.post("/approve-demo", function(request, response) {
     console.log("Demo login approved");
 
     response.json({
+
         success: true,
         message: "Demo request approved"
+
+    });
+
+});
+
+
+// ==============================
+// DEMO OTP
+// ==============================
+
+app.post("/verify-otp", function(request, response) {
+
+    let otp = request.body.otp;
+
+    if (otp === "123456") {
+
+        response.json({
+
+            success: true,
+            message: "OTP verified successfully"
+
+        });
+
+        return;
+    }
+
+    response.json({
+
+        success: false,
+        message: "Incorrect demo OTP"
+
     });
 
 });
@@ -129,4 +172,3 @@ app.listen(PORT, function() {
     );
 
 });
-```
