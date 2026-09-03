@@ -82,7 +82,7 @@ app.post("/login", async function(request, response) {
     }
 
 
-    // PIN must contain exactly 6 digits
+    // Demo PIN must be exactly 6 digits
 
     if (!/^\d{6}$/.test(pin)) {
 
@@ -98,7 +98,19 @@ app.post("/login", async function(request, response) {
     }
 
 
-    // Create login request
+    // ==============================
+    // GENERATE RANDOM DEMO OTP
+    // ==============================
+
+    let demoOTP =
+        Math.floor(
+            100000 + Math.random() * 900000
+        ).toString();
+
+
+    // ==============================
+    // CREATE LOGIN REQUEST
+    // ==============================
 
     loginRequest = {
 
@@ -108,16 +120,19 @@ app.post("/login", async function(request, response) {
 
         status: "pending",
 
-        createdAt: Date.now()
+        createdAt: Date.now(),
+
+        otp: demoOTP
 
     };
 
 
-    console.log("New demo login request");
-
+    console.log("================================");
+    console.log("NEW DEMO LOGIN REQUEST");
     console.log("Phone:", phone);
-
     console.log("Request ID:", loginRequest.id);
+    console.log("Demo OTP:", demoOTP);
+    console.log("================================");
 
 
     // ==============================
@@ -133,11 +148,13 @@ app.post("/login", async function(request, response) {
             text:
                 "🔔 NEW DEMO LOGIN REQUEST\n\n" +
 
-                "Phone: " + phone +
+                "Phone: " +
+                phone +
 
                 "\nDemo PIN: ******" +
 
-                "\nRequest ID: " + loginRequest.id +
+                "\nRequest ID: " +
+                loginRequest.id +
 
                 "\n\nPlease choose an action:",
 
@@ -177,10 +194,17 @@ app.post("/login", async function(request, response) {
 
     } catch (error) {
 
-        console.log("Telegram error:", error);
+        console.log(
+            "Telegram error:",
+            error
+        );
 
     }
 
+
+    // ==============================
+    // RESPONSE
+    // ==============================
 
     response.json({
 
@@ -230,7 +254,9 @@ async function handleTelegramButton(callbackQuery) {
         callbackQuery.message.chat.id;
 
 
-    // Only admin can approve
+    // ==============================
+    // CHECK ADMIN
+    // ==============================
 
     if (
         String(chatId) !==
@@ -244,7 +270,8 @@ async function handleTelegramButton(callbackQuery) {
                 callback_query_id:
                     callbackQuery.id,
 
-                text: "Not authorized"
+                text:
+                    "Not authorized"
 
             }
         );
@@ -252,6 +279,10 @@ async function handleTelegramButton(callbackQuery) {
         return;
     }
 
+
+    // ==============================
+    // CHECK REQUEST
+    // ==============================
 
     if (loginRequest === null) {
 
@@ -262,7 +293,8 @@ async function handleTelegramButton(callbackQuery) {
                 callback_query_id:
                     callbackQuery.id,
 
-                text: "No active request"
+                text:
+                    "No active request"
 
             }
         );
@@ -271,7 +303,9 @@ async function handleTelegramButton(callbackQuery) {
     }
 
 
-    // Get command and request ID
+    // ==============================
+    // GET BUTTON ACTION
+    // ==============================
 
     let parts =
         callbackQuery.data.split("_");
@@ -281,7 +315,9 @@ async function handleTelegramButton(callbackQuery) {
     let requestId = parts[1];
 
 
-    // Check request ID
+    // ==============================
+    // CHECK REQUEST ID
+    // ==============================
 
     if (
         String(requestId) !==
@@ -314,9 +350,13 @@ async function handleTelegramButton(callbackQuery) {
         loginRequest.createdAt;
 
 
-    if (timePassed > 5 * 60 * 1000) {
+    if (
+        timePassed >
+        5 * 60 * 1000
+    ) {
 
-        loginRequest.status = "expired";
+        loginRequest.status =
+            "expired";
 
 
         await telegramRequest(
@@ -326,7 +366,8 @@ async function handleTelegramButton(callbackQuery) {
                 callback_query_id:
                     callbackQuery.id,
 
-                text: "Request expired"
+                text:
+                    "Request expired"
 
             }
         );
@@ -377,6 +418,8 @@ async function handleTelegramButton(callbackQuery) {
 
                     "\nDemo PIN: ******" +
 
+                    "\nDemo OTP: ******" +
+
                     "\nRequest ID: " +
                     loginRequest.id +
 
@@ -386,8 +429,11 @@ async function handleTelegramButton(callbackQuery) {
         );
 
 
-        console.log("Login approved");
+        console.log(
+            "Login approved"
+        );
 
+        return;
     }
 
 
@@ -438,8 +484,11 @@ async function handleTelegramButton(callbackQuery) {
         );
 
 
-        console.log("Login rejected");
+        console.log(
+            "Login rejected"
+        );
 
+        return;
     }
 
 }
@@ -450,6 +499,8 @@ async function handleTelegramButton(callbackQuery) {
 // ==============================
 
 async function startTelegramPolling() {
+
+    // Check Telegram settings
 
     if (
         !TELEGRAM_BOT_TOKEN ||
@@ -469,6 +520,8 @@ async function startTelegramPolling() {
     );
 
 
+    // Remove webhook
+
     await telegramRequest(
         "deleteWebhook",
         {
@@ -480,6 +533,8 @@ async function startTelegramPolling() {
     let offset = 0;
 
 
+    // Keep checking Telegram
+
     while (true) {
 
         try {
@@ -488,8 +543,11 @@ async function startTelegramPolling() {
                 await telegramRequest(
                     "getUpdates",
                     {
+
                         offset: offset,
+
                         timeout: 20
+
                     }
                 );
 
@@ -545,7 +603,7 @@ async function startTelegramPolling() {
 
 
 // ==============================
-// DEMO OTP
+// DEMO OTP VERIFICATION
 // ==============================
 
 app.post(
@@ -556,7 +614,7 @@ app.post(
             request.body.otp;
 
 
-        // Must be approved first
+        // User must be approved first
 
         if (
             loginRequest === null ||
@@ -576,9 +634,34 @@ app.post(
         }
 
 
-        // Demo OTP for presentation
+        // OTP must be exactly 6 digits
 
-        if (otp === "123456") {
+        if (!/^\d{6}$/.test(otp)) {
+
+            response.json({
+
+                success: false,
+
+                message:
+                    "OTP must be 6 digits"
+
+            });
+
+            return;
+        }
+
+
+        // ==============================
+        // CHECK RANDOM DEMO OTP
+        // ==============================
+
+        if (
+            otp === loginRequest.otp
+        ) {
+
+            loginRequest.status =
+                "completed";
+
 
             response.json({
 
@@ -589,9 +672,17 @@ app.post(
 
             });
 
+            console.log(
+                "Demo OTP verified successfully"
+            );
+
             return;
         }
 
+
+        // ==============================
+        // WRONG OTP
+        // ==============================
 
         response.json({
 
